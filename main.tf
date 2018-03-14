@@ -29,16 +29,24 @@ data "template_file" "vars" {
     }
 }
 
-resource "null_resource" "mk_and_mv_win" {
+resource "null_resource" "mkdirs_win" {
   count = "${var.windows_managed ? 1 : 0}"
   provisioner "local-exec" {
-    command = "mkdir ${path.module}\\lambda && mkdir ${path.module}\\tmp && cp ${path.module}\\ebs_bckup\\ebs_bckup.py ${path.module}\\tmp\\ebs_bckup.py"
+    command = "mkdir ${path.module}\\lambda ${path.module}\\tmp"
+  }
+}
+
+resource "null_resource" "cp_script_win" {
+  count = "${var.windows_managed ? 1 : 0}"
+  depends_on  = ["null_resource.mkdirs_win"]
+  provisioner "local-exec" {
+    command = "cp ${path.module}\\ebs_bckup\\ebs_bckup.py ${path.module}\\tmp\\ebs_bckup.py"
   }
 }
 
 resource "null_resource" "buildlambdazip_win" {
   count = "${var.windows_managed ? 1 : 0}"
-  depends_on  = ["null_resource.mk_and_mv_win"]
+  depends_on  = ["null_resource.cp_script_win"]
   provisioner "local-exec" {
     command = "echo \"${data.template_file.vars.rendered}\" > ${path.module}\\tmp\\vars.ini"
   }
