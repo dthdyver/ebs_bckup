@@ -68,7 +68,7 @@ resource "aws_lambda_function" "ebs_bckup_lambda" {
   handler           = "ebs_bckup.lambda_handler"
   timeout           = "60"
   publish           = true
-  depends_on        = ["null_resource.buildlambdazip"]
+  depends_on        = ["archive_file.lambda_zip"]
 }
 
 # Run the function with CloudWatch Event cronlike scheduler
