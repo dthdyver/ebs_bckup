@@ -30,15 +30,22 @@ data "template_file" "vars" {
   }
 }
 
-resource "null_resource" "mkdirs" {
+resource "null_resource" "mkdir_lambda" {
   triggers { key = "${uuid()}" }
   provisioner "local-exec" {
-    command = "mkdir ${path.module}\\lambda && mkdir ${path.module}\\tmp"
+    command = "if not exist ${path.module}\\lambda mkdir ${path.module}\\lambda"
+  }
+}
+
+resource "null_resource" "mkdir_tmp" {
+  triggers { key = "${uuid()}" }
+  provisioner "local-exec" {
+    command = "if not exist ${path.module}\\tmp mkdir ${path.module}\\tmp"
   }
 }
 
 resource "null_resource" "mv_python_script" {
-  depends_on  = ["null_resource.mkdirs"]
+  depends_on  = ["null_resource.mkdir_lambda", "null_resource.mkdir_tmp"]
   provisioner "local-exec" {
     command = "cp ${path.module}\\ebs_bckup\\ebs_bckup.py ${path.module}\\tmp\\ebs_bckup.py"
   }
