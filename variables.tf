@@ -25,3 +25,8 @@ variable "cron_expression" {
 variable "regions" {
   type = "list"
 }
+
+variable "windows_managed" {
+  description = "Boolean parameter that indicates if Terraform is run in a Windows environment"
+  default = false
+}

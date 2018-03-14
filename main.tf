@@ -29,8 +29,23 @@ data "template_file" "vars" {
     }
 }
 
+resource "null_resource" "mk_and_mv_win" {
+  count = "${var.windows_managed ? 1 : 0}"
+  provisioner "local-exec" {
+    command = "mkdir ${path.module}\\lambda && mkdir ${path.module}\\tmp && cp ${path.module}\\ebs_bckup\\ebs_bckup.py ${path.module}\\tmp\\ebs_bckup.py"
+  }
+}
+
+resource "null_resource" "buildlambdazip_win" {
+  count = "${var.windows_managed ? 1 : 0}"
+  depends_on  = ["null_resource.mk_and_mv"]
+  provisioner "local-exec" {
+    command = "echo \"${data.template_file.vars.rendered}\" > ${path.module}\\tmp\\vars.ini"
+  }
+}
 
 resource "null_resource" "buildlambdazip" {
+  count = "${var.windows_managed ? 0 : 1}"
   triggers { key = "${uuid()}" }
   provisioner "local-exec" {
     command = <<EOF

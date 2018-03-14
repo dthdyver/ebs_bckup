@@ -11,6 +11,7 @@ The function is triggered via a CloudWatch event that can be freely configured b
 - `stack_prefix`     - Prefix for resource generation. Default is `ebs_bckup`
 - `cron_expression`  - Cron expression for CloudWatch events. Default is `"22 1 * * ? *"`
 - `regions`          - List of regions in which the Lambda function should run. Requires at least one entry (eg. `["eu-west-1", "us-west-1"]`)
+- `windows_managed`  - Set to `true` if you are running Terraform in a Windows environment
 
 ## Outputs
 Default outputs are `aws_iam_role_arn` with the value of the created IAM role for the Lambda function and the `lambda_function_name`
