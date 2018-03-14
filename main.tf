@@ -30,15 +30,19 @@ data "template_file" "vars" {
   }
 }
 
-resource "null_resource" "mkdir_lambda" {
+resource "null_resource" "trigger" {
   triggers { key = "${uuid()}" }
+}
+
+resource "null_resource" "mkdir_lambda" {
+  depends_on = ["null_resource.trigger"]
   provisioner "local-exec" {
     command = "if not exist ${path.module}\\lambda mkdir ${path.module}\\lambda"
   }
 }
 
 resource "null_resource" "mkdir_tmp" {
-  triggers { key = "${uuid()}" }
+  depends_on = ["null_resource.trigger"]
   provisioner "local-exec" {
     command = "if not exist ${path.module}\\tmp mkdir ${path.module}\\tmp"
   }
