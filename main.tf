@@ -38,7 +38,7 @@ resource "null_resource" "mk_and_mv_win" {
 
 resource "null_resource" "buildlambdazip_win" {
   count = "${var.windows_managed ? 1 : 0}"
-  depends_on  = ["null_resource.mk_and_mv"]
+  depends_on  = ["null_resource.mk_and_mv_win"]
   provisioner "local-exec" {
     command = "echo \"${data.template_file.vars.rendered}\" > ${path.module}\\tmp\\vars.ini"
   }
