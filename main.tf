@@ -64,9 +64,16 @@ resource "local_file" "buildlambdazip" {
   filename = "${path.module}/tmp/vars.ini"
 }
 
+data "null_data_source" "check_script_change_trigger" {
+  inputs = {
+    trigger = "${null_resource.trigger.id}"
+    source_dir = "${path.module}\\tmp"
+  }
+}
+
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}\\tmp"
+  source_dir  = "${data.null_data_source.check_script_change_trigger.outputs["source_dir"]}"
   output_path = "${path.module}\\lambda\\${var.stack_prefix}-${var.unique_name}.zip"
   depends_on  = ["local_file.buildlambdazip"]
 }
