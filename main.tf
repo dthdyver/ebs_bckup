@@ -43,17 +43,17 @@ resource "null_resource" "mv_python_script" {
   }
 }
 
-resource "null_resource" "buildlambdazip" {
+resource "local_file" "buildlambdazip" {
   depends_on  = ["null_resource.mv_python_script"]
-  provisioner "local-exec" {
-    command = "echo \"${data.template_file.vars.rendered}\" > ${path.module}\\tmp\\vars.ini"
-  }
+  content  = "${data.template_file.vars.rendered}"
+  filename = "${path.module}/tmp/vars.ini"
 }
+
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_dir  = "${path.module}\\tmp"
   output_path = "${path.module}\\lambda\\${var.stack_prefix}-${var.unique_name}.zip"
-  depends_on  = ["null_resource.buildlambdazip"]
+  depends_on  = ["local_file.buildlambdazip"]
 }
 
 # Create lambda function
