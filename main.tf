@@ -47,7 +47,7 @@ resource "null_resource" "mkdir_tmp" {
 resource "null_resource" "mv_python_script" {
   depends_on  = ["null_resource.mkdir_lambda", "null_resource.mkdir_tmp"]
   provisioner "local-exec" {
-    command = "cp ${path.module}\\ebs_bckup\\ebs_bckup.py ${path.module}\\tmp\\ebs_bckup.py"
+    command = "copy ${path.module}\\ebs_bckup\\ebs_bckup.py ${path.module}\\tmp\\ebs_bckup.py"
   }
 }
 
