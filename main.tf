@@ -32,7 +32,7 @@ data "template_file" "vars" {
 
 resource "null_resource" "trigger" {
   triggers {
-    SCRIPT_SHA                     = "${sha256(file("{path.module}\\ebs_bckup\\ebs_bckup.py"))}"
+    SCRIPT_SHA                     = "${sha256(file("${path.module}\\ebs_bckup\\ebs_bckup.py"))}"
     TEMPLATE                       = "${data.template_file.vars.rendered}"
   }
 }
