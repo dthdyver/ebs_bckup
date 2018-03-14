@@ -13,7 +13,8 @@ print('Loading Backup function')
 def lambda_handler(event, context):
     regionsStrg = config.get('regions', 'regionList')
     regionsList = regionsStrg.split(',')
-    EC2_INSTANCE_TAG = config.get('main', 'EC2_INSTANCE_TAG')
+    EC2_INSTANCE_TAG_KEY = config.get('main', 'EC2_INSTANCE_TAG_KEY')
+    EC2_INSTANCE_TAG_VALUE = config.get('main', 'EC2_INSTANCE_TAG_VALUE')
     retention_days = config.getint('main', 'RETENTION_DAYS')
     for r in regionsList:
         aws_region = r
