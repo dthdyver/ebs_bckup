@@ -31,7 +31,10 @@ data "template_file" "vars" {
 }
 
 resource "null_resource" "trigger" {
-  triggers { key = "${uuid()}" }
+  triggers {
+    SCRIPT_SHA                     = "${sha256(file("{path.module}\\ebs_bckup\\ebs_bckup.py"))}"
+    TEMPLATE                       = "${data.template_file.vars.rendered}"
+  }
 }
 
 resource "null_resource" "mkdir_lambda" {
