@@ -29,44 +29,18 @@ data "template_file" "vars" {
     }
 }
 
-resource "null_resource" "mkdirs_win" {
-  count = "${var.windows_managed ? 1 : 0}"
-  provisioner "local-exec" {
-    command = "mkdir ${path.module}\\lambda ${path.module}\\tmp"
-  }
-}
-
-resource "null_resource" "cp_script_win" {
-  count = "${var.windows_managed ? 1 : 0}"
-  depends_on  = ["null_resource.mkdirs_win"]
-  provisioner "local-exec" {
-    command = "cp ${path.module}\\ebs_bckup\\ebs_bckup.py ${path.module}\\tmp\\ebs_bckup.py"
-  }
-}
-
-resource "null_resource" "buildlambdazip_win" {
-  count = "${var.windows_managed ? 1 : 0}"
-  depends_on  = ["null_resource.cp_script_win"]
-  provisioner "local-exec" {
-    command = "echo \"${data.template_file.vars.rendered}\" > ${path.module}\\tmp\\vars.ini"
-  }
-}
-
 resource "null_resource" "buildlambdazip" {
   count = "${var.windows_managed ? 0 : 1}"
   triggers { key = "${uuid()}" }
   provisioner "local-exec" {
-    command = <<EOF
-    mkdir -p ${path.module}/lambda && mkdir -p ${path.module}/tmp
-    cp ${path.module}/ebs_bckup/ebs_bckup.py ${path.module}/tmp/ebs_bckup.py
-    echo "${data.template_file.vars.rendered}" > ${path.module}/tmp/vars.ini
-EOF
+    command = "echo \"${data.template_file.vars.rendered}\" > ${path.module}/ebs_bckup/vars.ini"
   }
 }
+
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/tmp"
-  output_path = "${path.module}/lambda/${var.stack_prefix}-${var.unique_name}.zip"
+  source_dir  = "${path.module}/ebs_bckup"
+  output_path = "${path.module}/ebs_bckup/${var.stack_prefix}-${var.unique_name}.zip"
   depends_on  = ["null_resource.buildlambdazip"]
 }
 
@@ -75,7 +49,7 @@ data "archive_file" "lambda_zip" {
 
 resource "aws_lambda_function" "ebs_bckup_lambda" {
   function_name     = "${var.stack_prefix}_lambda_${var.unique_name}"
-  filename          = "${path.module}/lambda/${var.stack_prefix}-${var.unique_name}.zip"
+  filename          = "${path.module}/ebs_bckup/${var.stack_prefix}-${var.unique_name}.zip"
   source_code_hash  = "${data.archive_file.lambda_zip.output_base64sha256}"
   role              = "${aws_iam_role.ebs_bckup-role-lambdarole.arn}"
   runtime           = "python2.7"
@@ -83,6 +57,13 @@ resource "aws_lambda_function" "ebs_bckup_lambda" {
   timeout           = "60"
   publish           = true
   depends_on        = ["null_resource.buildlambdazip"]
+}
+
+resource "null_resource" "cleanup" {
+  depends_on  = ["aws_lambda_function.ebs_bckup_lambda"]
+  provisioner "local-exec" {
+    command = "rm \"${path.module}/ebs_bckup/vars.ini\" && rm \"${path.module}/ebs_bckup/${var.stack_prefix}-${var.unique_name}.zip\""
+  }
 }
 
 # Run the function with CloudWatch Event cronlike scheduler
