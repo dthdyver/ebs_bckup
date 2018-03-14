@@ -22,7 +22,7 @@ def lambda_handler(event, context):
         ec = boto3.client('ec2', region_name=aws_region)
         reservations = ec.describe_instances(
             Filters=[
-                {'Name': 'tag-value', 'Values': [EC2_INSTANCE_TAG]},
+                {'Name': 'tag-key', 'Values': [EC2_INSTANCE_TAG]},
             ]
         )['Reservations']
         instances = sum(
@@ -30,6 +30,8 @@ def lambda_handler(event, context):
                 [i for i in r['Instances']]
                 for r in reservations
                 ], [])
+
+        print("Total number of instances that need a snapshot: %d" % len(reservations))
 
         for instance in instances:
             for dev in instance['BlockDeviceMappings']:
