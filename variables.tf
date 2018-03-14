@@ -1,11 +1,15 @@
 # declare necessary variables
 
-variable "EC2_INSTANCE_TAG" {
-  default     = "Backup"
-  description = "Tag to identify the EC2 target instances of the Lambda Function"
+variable "EC2_INSTANCE_TAG_KEY" {
+  default     = "BackupStrategy"
+  description = "Tag to identify the EC2 target instances of the Lambda Function (Key)"
+}
+variable "EC2_INSTANCE_TAG_VALUE" {
+  default     = "AutomatedBackup"
+  description = "Tag to identify the EC2 target instances of the Lambda Function (Value)"
 }
 variable "RETENTION_DAYS" {
-  default = 5
+  default = 7
   description = "Numbers of Days that the EBS Snapshots will be stored (INT)"
 }
 variable "unique_name" {
